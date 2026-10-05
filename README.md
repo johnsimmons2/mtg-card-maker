@@ -24,7 +24,7 @@ npx playwright install chromium
 ## Everyday Usage
 
 ### Step 1 — Add art
-Drop your card art images into the root `art/` folder (JPG/PNG/WEBP/GIF/SVG). Custom full-frame background textures go in `art/backgrounds/`.
+Drop your card art images into `cards/art/` (JPG/PNG/WEBP/GIF/SVG). Custom full-frame background textures go in `cards/art/backgrounds/`. The `cards/` folder holds your own creations (`cards.json`, `sets_config.json`, art) and its contents are gitignored (only the empty `cards/art/` folder structure is tracked). The server creates any missing folders on first start, and a fresh clone with no `cards.json` simply starts with an empty collection.
 
 ### Step 2 — Run the web application
 Open a terminal in the `editor/` folder and run:
@@ -75,15 +75,15 @@ This starts two local servers, both with hot reload:
 | `id` | Yes | Unique snake_case identifier — becomes the output filename (`"my_card"` in set `"JBA"` → `output/JBA/my_card.png`) |
 | `name` | Yes | The card's display name |
 | `mana_cost` | Yes | Mana cost using MTG brace notation: `{W}` `{U}` `{B}` `{R}` `{G}` `{1}` etc. Use `""` for lands |
-| `art_path` | Yes | Filename of the art image in `art/` (e.g. `"dragon.jpg"`) |
+| `art_path` | Yes | Filename of the art image in `cards/art/` (e.g. `"dragon.jpg"`) |
 | `type_line` | Yes | Full type line (e.g. `"Creature — Human Wizard"`, `"Instant"`, `"Land"`) |
 | `set_symbol` | Yes | Short set code (e.g. `"M"`, `"JBA"`). Looked up in `sets_config.json` to decide what text is printed and how it's styled — see [Set styles](#set-styles) |
 | `rules_text` | Yes | Rules text. Use MTG brace notation for symbols (`{T}`, `{2}`, etc.) and `\n` for line breaks |
 | `power_toughness` | Yes | `"P/T"` for creatures (e.g. `"3/2"`). Use `""` for non-creatures |
 | `rarity` | No | Rarity letter shown in footer: `"C"` `"U"` `"R"` `"M"`. Defaults to `"R"` |
 | `artist` | No | Artist name shown in footer. |
-| `watermark_path` | No | Filename of a watermark image in `art/` to show behind rules text. Omit to inherit the set's/template's, or for none |
-| `background_path` | No | Filename of a custom background image in `art/backgrounds/` to use in place of procedural textures. Omit to draw from the set's texture pool, or auto-derive |
+| `watermark_path` | No | Filename of a watermark image in `cards/art/` to show behind rules text. Omit to inherit the set's/template's, or for none |
+| `background_path` | No | Filename of a custom background image in `cards/art/backgrounds/` to use in place of procedural textures. Omit to draw from the set's texture pool, or auto-derive |
 | `metadata` | No | Object containing custom settings (e.g., `template`, `rulesFontSize`, `artHeight`, `nameFontSize`, `artXOffset`/`artYOffset`, `manaSymbolSize`, `rulesSymbolSize`, `forceSolid`, `neonGlowIntensity`, `backgroundBlendMode`, `backgroundOpacity`, tags, etc.) |
 
 ---
@@ -92,15 +92,16 @@ This starts two local servers, both with hot reload:
 
 ```
 mtg-cards/
-├── art/                    # Source art (+ art/backgrounds/ for full-frame textures)
+├── cards/                  # Your content (untracked): created on first run
+│   ├── cards.json          #   The card database
+│   ├── sets_config.json    #   Per-set symbol text, colors, fonts and effects
+│   └── art/                #   Source art (+ art/backgrounds/ for full-frame textures)
 ├── output/                 # Rendered PNGs, filed by set
 │   ├── JBA/                #   e.g. output/JBA/jotaro.png
 │   └── M/                  #   cards with no set land in output/ directly
 ├── mana-master/            # Vendored mana/keyrune symbol font & SVG set
-├── cards.json              # The card database
 ├── templates_config.json   # Per-template layout/style defaults
 ├── global_settings.json    # Global mana-symbol & color palette settings
-├── sets_config.json        # Per-set symbol text, colors, fonts and effects
 └── editor/                 # The React + Express application
     ├── server.js            # Express API: cards, art, backgrounds, render, AI bridge
     └── src/
@@ -133,7 +134,7 @@ Use this prompt to have any LLM (ChatGPT, Claude, etc.) format cards into the co
 > - `id`: lowercase snake_case unique identifier, no spaces or special characters (used as the output filename)
 > - `name`: the card's display name
 > - `mana_cost`: MTG brace notation — `{W}` white, `{U}` blue, `{B}` black, `{R}` red, `{G}` green, `{1}` / `{2}` / etc. generic. Use `""` for lands or free spells.
-> - `art_path`: the filename of the art image in the `art/` folder (e.g. `"dragon.jpg"`). I will provide these filenames.
+> - `art_path`: the filename of the art image in the `cards/art/` folder (e.g. `"dragon.jpg"`). I will provide these filenames.
 > - `type_line`: the full type line as printed on the card (e.g. `"Creature — Elf Druid"`, `"Instant"`, `"Legendary Artifact"`)
 > - `set_symbol`: a short set code for the footer, typically `"M"` unless I specify otherwise
 > - `rules_text`: rules text as a single string. Use MTG brace notation for all symbols (`{T}` tap, `{2}` generic mana, etc.). Use `\n` between separate paragraphs or abilities.
@@ -333,7 +334,7 @@ overrides:
 | Rule | Values | Effect |
 |---|---|---|
 | `multicolorFrame` | `auto` \| `gold` \| `gradient` | How multicolour cards are framed. `auto` keeps the old behaviour (two colours blend, three or more go gold); `gold` matches printed Magic; `gradient` blends all of the card's colours. This is what lets JBA use gradients while other sets use gold |
-| `backgroundPool` | array of filenames in `art/backgrounds/` | Cards with no `background_path` of their own are assigned one, chosen by hashing the card's `id` so it stays stable between renders |
+| `backgroundPool` | array of filenames in `cards/art/backgrounds/` | Cards with no `background_path` of their own are assigned one, chosen by hashing the card's `id` so it stays stable between renders |
 | `palette` | `{COLORS, PALE_COLORS, THEME_COLORS, gold*}` | Optional per-set colour palette, overriding the global one |
 
 ### Where renders are written

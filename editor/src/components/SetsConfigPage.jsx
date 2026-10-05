@@ -662,7 +662,7 @@ export default function SetsConfigPage({ setsConfig, cards, onSave, backgrounds 
                   </div>
                 ))}
                 <div className="form-group">
-                  <label className="form-label">Watermark image (in art/)</label>
+                  <label className="form-label">Watermark image (in cards/art/)</label>
                   <input
                     className="form-input"
                     value={active.cardDefaults?.watermark_path ?? ''}
@@ -731,7 +731,7 @@ export default function SetsConfigPage({ setsConfig, cards, onSave, backgrounds 
                 </p>
                 {backgrounds.length === 0 ? (
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    No images in <code>art/backgrounds/</code> yet.
+                    No images in <code>cards/art/backgrounds/</code> yet.
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>

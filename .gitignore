@@ -38,19 +38,38 @@ venv/
 Thumbs.db
 desktop.ini
 
-# ---- Claude Code nested worktrees (full repo checkouts) ----
-.claude/worktrees/
+# ---- Claude Code local state (worktrees, settings) ----
+.claude/
 
 # ---- User content (kept local) ----
+# cards/ holds your own creations. Only its folder structure is tracked.
+/cards/*
+!/cards/art/
+/cards/art/*
+!/cards/art/.gitkeep
+!/cards/art/backgrounds/
+/cards/art/backgrounds/*
+!/cards/art/backgrounds/.gitkeep
 /cards.json
 /cards_backup.json
 /sets_config.json
 /art/*
-!/art/.gitkeep
-!/art/backgrounds/
-/art/backgrounds/*
-!/art/backgrounds/.gitkeep
 /output/*
 !/output/.gitkeep
 /checkpoint/
 *.tsdb
+/*.png
+CARD_ANALYSIS.md
+
+# ---- Legacy files from the old Python generator (not part of the app) ----
+/server.js
+/card.html
+/generate_cards.py
+/style.css
+/mtg-card-maker.zip
+/restoration*
+/cat_expansion*
+/fish_jjba*
+/main_stax*
+/deck_*.png
+/example_card.png

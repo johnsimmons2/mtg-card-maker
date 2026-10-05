@@ -15,16 +15,21 @@ const PORT = process.env.PORT || 3001;
 
 // Paths relative to this script inside mtg-cards/editor/
 const ROOT_DIR = path.resolve(__dirname, '..');
-const CARDS_JSON_PATH = path.join(ROOT_DIR, 'cards.json');
-const ART_DIR = path.join(ROOT_DIR, 'art');
+// cards/ holds user-specific content (cards.json, sets_config.json, art/); it is untracked.
+const CARDS_DIR = path.join(ROOT_DIR, 'cards');
+const CARDS_JSON_PATH = path.join(CARDS_DIR, 'cards.json');
+const ART_DIR = path.join(CARDS_DIR, 'art');
 const BACKGROUNDS_DIR = path.join(ART_DIR, 'backgrounds');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'output');
 const MANA_MASTER_DIR = path.join(ROOT_DIR, 'mana-master');
 const TEMPLATES_CONFIG_PATH = path.join(ROOT_DIR, 'templates_config.json');
 const GLOBAL_SETTINGS_PATH = path.join(ROOT_DIR, 'global_settings.json');
-const SETS_CONFIG_PATH = path.join(ROOT_DIR, 'sets_config.json');
+const SETS_CONFIG_PATH = path.join(CARDS_DIR, 'sets_config.json');
 
-// Ensure necessary directories exist
+// Ensure necessary directories exist (cards/ is untracked, so a fresh clone lacks most of it)
+if (!fs.existsSync(CARDS_DIR)) {
+  fs.mkdirSync(CARDS_DIR, { recursive: true });
+}
 if (!fs.existsSync(ART_DIR)) {
   fs.mkdirSync(ART_DIR, { recursive: true });
 }
@@ -171,8 +176,9 @@ function pruneOtherRenders(cardId, keepPath) {
 // API Endpoint: Get all cards
 app.get('/api/cards', (req, res) => {
   try {
+    // A fresh clone has no cards.json yet: that's an empty collection, not an error.
     if (!fs.existsSync(CARDS_JSON_PATH)) {
-      return res.status(404).json({ error: 'cards.json not found' });
+      return res.json([]);
     }
     const data = fs.readFileSync(CARDS_JSON_PATH, 'utf8');
     const cards = JSON.parse(data);
