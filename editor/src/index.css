@@ -1,0 +1,650 @@
+/* Custom Styling Design Tokens */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+
+  /* --- Authentic Magic card typography ---------------------------------
+     --font-mtg-title : names, type lines, P/T. Real cards use Beleren Bold;
+                        we prefer it when locally installed, else Source Serif 4.
+     --font-mtg-body  : rules & flavor text. MPlantin is the genuine article and
+                        ships with mana-master, declared by its mana.css.
+     Keep rules text at weight 400 — printed Magic rules text is never bold.  */
+  --font-mtg-title: 'Beleren Bold', 'Beleren', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mtg-body: 'MPlantin', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+  /* Mana symbol custom alignment variables */
+  --ms-vertical-align: middle;
+  --ms-size: 0.95em;
+  --ms-margin-left: 0.1em;
+  --ms-margin-right: 0.1em;
+  --ms-inner-scale: 1.2;
+  --ms-inner-offset-x: 0.01rem;
+  --ms-inner-offset-y: -0.03rem;
+
+  /* Generic/colourless mana (numerals, X/Y/Z, ½, ∞) is tuned separately —
+     see the .ms-cost:is(...) rule near the bottom of this file for why. */
+  --ms-inner-scale-numeric: 0.8;
+  --ms-inner-offset-x-numeric: 0rem;
+  --ms-inner-offset-y-numeric: 0rem;
+
+  /* Harmonious Dark Palette */
+  --bg-main: hsl(222, 20%, 8%);
+  --bg-card: hsl(222, 16%, 13%);
+  --bg-card-hover: hsl(222, 16%, 16%);
+  --bg-input: hsl(222, 12%, 18%);
+  --border-color: hsl(222, 12%, 22%);
+  --border-focus: hsl(210, 100%, 60%);
+  
+  --text-primary: hsl(0, 0%, 98%);
+  --text-secondary: hsl(218, 12%, 80%);
+  --text-muted: hsl(218, 10%, 60%);
+
+  /* Accent Colors */
+  --accent-blue: hsl(200, 95%, 45%);
+  --accent-blue-glow: hsla(200, 95%, 45%, 0.35);
+  
+  --accent-red: hsl(0, 75%, 50%);
+  --accent-green: hsl(140, 65%, 40%);
+  --accent-gold: hsl(45, 80%, 55%);
+  
+  /* MTG Color Theme Palette (Standard HSL equivalents) */
+  --mtg-w: #f8f0e3;
+  --mtg-u: #3e8baa;
+  --mtg-b: #585858;
+  --mtg-r: #da3a35;
+  --mtg-g: #1e6e3d;
+  --mtg-artifact: #8a99a8;
+  --mtg-land: #b3a175;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-inset: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-card);
+  border: 2px solid var(--bg-main);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color);
+}
+
+/* Typography Utility */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* Layout Utilities */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: linear-gradient(to bottom, var(--bg-main), rgba(11, 15, 24, 0.8));
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  max-width: 1800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sidebar and Panel Designs */
+.panel {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+/* Glassmorphism Container Classes */
+.glass-panel {
+  background: rgba(22, 28, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
+  padding: 2rem;
+  transition: border-color var(--transition-normal);
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Form Elements */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-input, .form-textarea, .form-select {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-inset);
+  width: 100%;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background-color: hsl(222, 12%, 20%);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Custom Checkbox/Switch */
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.switch-control {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: background-color var(--transition-fast);
+}
+
+.switch-control::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background-color: var(--text-primary);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+/* Accept `switch-active` either on an ancestor or on the .switch-control node
+   itself — the toggles in TemplatesConfigPage put it on the same element. */
+.switch-active .switch-control,
+.switch-control.switch-active {
+  background-color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.switch-active .switch-control::after,
+.switch-control.switch-active::after {
+  transform: translateX(20px);
+}
+
+/* Button Layouts */
+.btn {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, hsl(210, 100%, 40%) 100%);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 0 12px var(--accent-blue-glow);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.btn-danger {
+  background-color: var(--accent-red);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: hsl(0, 80%, 45%);
+  box-shadow: 0 0 12px rgba(218, 58, 53, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Interactive Color Pips Indicator */
+.color-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.color-pip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.color-pip:hover {
+  transform: scale(1.1);
+}
+
+.color-pip.selected {
+  border-color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.pip-w { background-color: var(--mtg-w); color: #000; }
+.pip-u { background-color: var(--mtg-u); color: #fff; }
+.pip-b { background-color: var(--mtg-b); color: #fff; }
+.pip-r { background-color: var(--mtg-r); color: #fff; }
+.pip-g { background-color: var(--mtg-g); color: #fff; }
+.pip-c { background-color: #222; border-color: var(--border-color); color: #fff; }
+
+/* Grid of Cards */
+.card-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-card-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-card-wrapper:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--text-muted);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-card-wrapper.selected {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Search and Filters Layout */
+.filters-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+/* Animation Utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-normal) forwards;
+}
+
+/* Micro-loading indicators */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Preview Modal / Detail Panel splits */
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(400px, 460px) 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+.preview-sticky-container {
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Mana Font symbol global master styling overrides */
+.ms-cost {
+  font-size: var(--ms-size, 0.95em) !important;
+  vertical-align: var(--ms-vertical-align, middle) !important;
+  margin-left: var(--ms-margin-left, 0.1em) !important;
+  margin-right: var(--ms-margin-right, 0.1em) !important;
+}
+
+.ms-cost::before,
+.ms-cost::after,
+.ms-cost.ms-wp::before,
+.ms-cost.ms-up::before,
+.ms-cost.ms-bp::before,
+.ms-cost.ms-rp::before,
+.ms-cost.ms-gp::before,
+.ms-cost.ms-cw::before,
+.ms-cost.ms-cu::before,
+.ms-cost.ms-cb::before,
+.ms-cost.ms-cr::before,
+.ms-cost.ms-cg::before,
+.ms-cost.ms-wup::before,
+.ms-cost.ms-wbp::before,
+.ms-cost.ms-ubp::before,
+.ms-cost.ms-urp::before,
+.ms-cost.ms-brp::before,
+.ms-cost.ms-bgp::before,
+.ms-cost.ms-rwp::before,
+.ms-cost.ms-rgp::before,
+.ms-cost.ms-gwp::before,
+.ms-cost.ms-gup::before,
+.ms-cost.ms-wup::after,
+.ms-cost.ms-wbp::after,
+.ms-cost.ms-ubp::after,
+.ms-cost.ms-urp::after,
+.ms-cost.ms-brp::after,
+.ms-cost.ms-bgp::after,
+.ms-cost.ms-rwp::after,
+.ms-cost.ms-rgp::after,
+.ms-cost.ms-gwp::after,
+.ms-cost.ms-gup::after {
+  transform: scale(var(--ms-inner-scale, 1.2)) 
+             translateX(var(--ms-inner-offset-x, 0.01rem)) 
+             translateY(var(--ms-inner-offset-y, -0.03rem)) !important;
+}
+
+/* Generic/colourless mana renders a NUMERAL rather than a pictorial glyph, and
+   numerals need different treatment from the coloured symbols.
+   The scale above (1.2) exists to make shapes like the water drop and fireball
+   fill their circle; applied to a digit it pushes the glyph past the circle's
+   edge and clips it top and bottom. Digits already fill most of the em box, so
+   they render at their natural size instead.
+   Covers X/Y/Z, ½ and ∞ too — all text-like glyphs with the same problem.
+   `:is()` takes the specificity of its most specific argument, so this
+   (0,2,0) correctly overrides the (0,1,0) rule above. */
+.ms-cost:is(
+  .ms-0, .ms-1, .ms-2, .ms-3, .ms-4, .ms-5, .ms-6, .ms-7, .ms-8, .ms-9,
+  .ms-10, .ms-11, .ms-12, .ms-13, .ms-14, .ms-15, .ms-16, .ms-17, .ms-18,
+  .ms-19, .ms-20, .ms-100, .ms-1000000,
+  .ms-x, .ms-y, .ms-z, .ms-half, .ms-infinity
+)::before {
+  transform: scale(var(--ms-inner-scale-numeric, 1))
+             translateX(var(--ms-inner-offset-x-numeric, 0rem))
+             translateY(var(--ms-inner-offset-y-numeric, 0rem)) !important;
+}
+
+/* Glyphs vertical alignment fixes - forces display:inline-block so transforms work on all mana symbols */
+.ms-cost::before,
+.ms-cost::after {
+  display: inline-block !important;
+}
+
+/* Independent symbol sizes */
+.mana-cost .ms-cost {
+  font-size: var(--ms-size-header, var(--ms-size, 0.95em)) !important;
+}
+.rules-text .ms-cost,
+.rules-text .ms {
+  font-size: var(--ms-size-rules, var(--ms-size, 0.95em)) !important;
+}
+
+/* Template layout overrides.
+   These exist so the Template Config sliders can win over the template
+   stylesheet; the fallbacks are the shipped defaults.
+
+   The modern fallbacks used to be `calc(100% + 24px)` with `-12px` margins,
+   which suited the old layout where the title and type bars deliberately
+   overhung the content column. The M15 frame stacks every panel flush to the
+   same edges, so an overhang here left the bars 12px left of the art window and
+   text box instead of centred on them. */
+.modern-header {
+  height: var(--title-box-height, 62px) !important;
+  width: var(--title-box-width, 100%) !important;
+  margin-left: var(--title-box-margin-left, 0) !important;
+  margin-right: var(--title-box-margin-right, 0) !important;
+}
+.modern-type-line {
+  height: var(--type-box-height, 54px) !important;
+  width: var(--type-box-width, 100%) !important;
+  margin-left: var(--type-box-margin-left, 0) !important;
+  margin-right: var(--type-box-margin-right, 0) !important;
+}
+
+.retro-header {
+  height: var(--title-box-height, 52px) !important;
+  width: var(--title-box-width, 100%) !important;
+  margin-left: var(--title-box-margin-left, 0) !important;
+  margin-right: var(--title-box-margin-right, 0) !important;
+}
+.retro-type-line {
+  height: var(--type-box-height, 46px) !important;
+  width: var(--type-box-width, 100%) !important;
+  margin-left: var(--type-box-margin-left, 0) !important;
+  margin-right: var(--type-box-margin-right, 0) !important;
+}
+
+.glass-header {
+  height: var(--title-box-height, 60px) !important;
+  width: var(--title-box-width, 100%) !important;
+  margin-left: var(--title-box-margin-left, 0) !important;
+  margin-right: var(--title-box-margin-right, 0) !important;
+}
+.glass-type-line {
+  height: var(--type-box-height, 52px) !important;
+  width: var(--type-box-width, 100%) !important;
+  margin-left: var(--type-box-margin-left, 0) !important;
+  margin-right: var(--type-box-margin-right, 0) !important;
+}
+
+.borderless-header {
+  height: var(--title-box-height, 60px) !important;
+  width: var(--title-box-width, 100%) !important;
+  margin-left: var(--title-box-margin-left, 0) !important;
+  margin-right: var(--title-box-margin-right, 0) !important;
+}
+.borderless-type-line {
+  height: var(--type-box-height, 54px) !important;
+  width: var(--type-box-width, 100%) !important;
+  margin-left: var(--type-box-margin-left, 0) !important;
+  margin-right: var(--type-box-margin-right, 0) !important;
+}
+
+/* Security stamp adjustments */
+.modern-security-stamp {
+  display: var(--stamp-display, flex) !important;
+  bottom: var(--stamp-offset-y, -17px) !important;
+}
+
+/* Footer layout overrides */
+.modern-footer, .retro-footer, .borderless-footer, .glass-footer {
+  font-size: var(--footer-font-size, 11px) !important;
+  color: var(--footer-text-color, #f2f2f2) !important;
+}

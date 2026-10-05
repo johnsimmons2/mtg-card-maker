@@ -1,0 +1,1084 @@
+/* ================================================================
+   Base card container.
+
+   744 x 1039 is a 1:1.397 ratio, matching a real 63 x 88 mm Magic card
+   (~11.8 px per mm). Every measurement below is derived from that scale,
+   so if you change the card size, scale the rest with it.
+
+   Printed cards have a ~3 mm black border and a ~3.5 mm corner radius,
+   which is 35 px and 41 px here.
+   ================================================================ */
+.preview-card {
+  width: 744px;
+  height: 1039px;
+  background-color: #0b0b0c;
+  border-radius: 41px;
+  padding: 30px 30px 24px 30px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+
+  /* Anti-aliasing that better matches offset print than the browser default. */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.preview-card * {
+  box-sizing: border-box;
+}
+
+/* Rules/flavor text is MPlantin at weight 400 on real cards — never bold.
+   Reminder text in parentheses is italic. */
+.preview-card .rules-text {
+  font-family: var(--font-mtg-body);
+  font-weight: 400;
+  font-variant-ligatures: common-ligatures;
+}
+
+.preview-card .rules-text em,
+.preview-card .rules-text i:not(.ms) {
+  font-style: italic;
+}
+
+/* Card names, type lines and P/T all use the title face. */
+.preview-card .card-name,
+.preview-card .mana-cost {
+  font-family: var(--font-mtg-title);
+}
+
+/* The name must never wrap or push the mana cost around: it is measured and
+   shrunk to fit by CardPreview's layout pass, and clipped as a last resort. */
+.card-name-container {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mana cost sits hard against the right edge and never shrinks. */
+.mana-cost {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Type lines are single-line on printed cards; the layout pass shrinks them. */
+.type-line-container {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.type-line-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* The set symbol keeps its size while the type line shrinks around it.
+   Its text and styling come from sets_config.json via resolveSetStyle(). */
+.set-symbol {
+  flex: 0 0 auto;
+  font-family: var(--font-mtg-title);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Multi-stop set codes paint the gradient through the glyphs themselves.
+   The gradient itself is supplied inline as background-image. */
+.set-symbol-gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  /* Give the gradient a stable box to sample from, so a short code like "JBA"
+     shows the whole ramp rather than a slice of it. */
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Clipping window for rules text.
+   The text box itself must stay overflow:visible so the P/T plate and the
+   security stamp can overhang its edges, so the guarantee that text never
+   escapes lives on this inner wrapper instead. It fills the text box's content
+   area exactly, which also makes it the element the layout pass measures. */
+.rules-text-clip {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  z-index: 2;
+  /* Printed cards centre short rules text vertically in the box rather than
+     top-aligning it. `safe center` keeps the top edge visible in the rare case
+     the text is still taller than the box at the minimum type size. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-content: safe center;
+}
+
+/* When a creature's P/T plate is present, hold the last line of rules text
+   clear of it rather than letting the two collide. */
+.rules-box.has-pt .rules-text-clip {
+  height: calc(100% - 18px);
+}
+
+/* ---------------------------------------------------------------- */
+/* TEMPLATE 1: MODERN CLASSIC (Official MTG Look)                    */
+/* ---------------------------------------------------------------- */
+
+/* The coloured frame moulding. On a real card this is one continuous piece of
+   printed colour; the title bar, art window, type bar and text box are recessed
+   panels sitting on top of it, all sharing the same left and right edges. */
+.template-modern {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--modern-corner-radius, 16px);
+  /* The coloured moulding band. Its width is the template's "Frame Border
+     Thickness" — on Modern the frame is printed colour, not a border line, so
+     the control drives this padding rather than a CSS border. */
+  padding: var(--frame-border-width, 18px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  background: var(--frame-bg);
+  /* Moulding relief: light along the top edge, shadow along the bottom.
+     "Bevel Strength" scales the highlight/shadow contrast of the moulding. */
+  box-shadow:
+    inset 0 2px 1px rgba(255,255,255,calc(0.28 * var(--modern-bevel-strength, 1))),
+    inset 0 -2px 2px rgba(0,0,0,calc(0.34 * var(--modern-bevel-strength, 1))),
+    inset 0 0 0 1px rgba(0,0,0,0.30),
+    0 1px 2px rgba(0,0,0,0.7);
+}
+
+.template-modern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--frame-texture);
+  background-size: var(--frame-texture-size, 420px);
+  background-position: var(--frame-texture-position, center);
+  background-repeat: var(--frame-texture-repeat, repeat);
+  mix-blend-mode: var(--blend-mode, multiply);
+  opacity: var(--frame-texture-opacity, 0.26);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Printed ink is never perfectly flat: a soft sheen down the frame plus a
+   corner vignette gives the moulding depth without muddying the colour. */
+.template-modern::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0) 26%, rgba(0,0,0,0.10) 100%),
+    radial-gradient(120% 85% at 50% 42%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.22) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Content column. Gaps let a hairline of frame colour show between panels,
+   the way the printed moulding separates them. */
+.modern-pinstripe {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  gap: var(--modern-panel-gap, 8px);
+  position: relative;
+}
+
+/* Shared styling for the title bar and the type bar. */
+.modern-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mtg-title);
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+  border-radius: 7px;
+  padding: 0 16px;
+  color: #0a0a0a;
+  flex-shrink: 0;
+  background: var(--box-tint);
+  /* A thin dark keyline plus a soft inner bevel — no glowing outline. */
+  box-shadow:
+    0 0 0 1.5px var(--card-theme-color-dark),
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 2px rgba(0,0,0,0.20),
+    0 1px 2px rgba(0,0,0,0.35);
+}
+
+.modern-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--parchment);
+  background-size: 420px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.22;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.modern-header {
+  height: var(--title-box-height, 62px);
+  width: var(--title-box-width, 100%);
+  margin-left: var(--title-box-margin-left, 0);
+  margin-right: var(--title-box-margin-right, 0);
+  font-size: 34px;
+  z-index: 3;
+}
+
+.modern-type-line {
+  height: var(--type-box-height, 54px);
+  width: var(--type-box-width, 100%);
+  margin-left: var(--type-box-margin-left, 0);
+  margin-right: var(--type-box-margin-right, 0);
+  font-size: 25px;
+  z-index: 5;
+}
+
+.modern-type-line .set-symbol {
+  flex: 0 0 auto;
+  font-size: 30px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  /* Printed set symbols are foil-stamped: a hint of relief, not a glow. */
+  text-shadow: 0 1px 1px rgba(0,0,0,0.45);
+}
+
+/* The art window is a recessed panel: dark keyline, shadow cast inward.
+   Flush with the title bar, type bar and text box — every panel shares the same
+   left and right edges so the frame reads as one continuous column. */
+.modern-art-box {
+  height: var(--art-box-height, 452px);
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  background: #000;
+  position: relative;
+  box-shadow:
+    0 0 0 1.5px var(--card-theme-color-dark),
+    inset 0 0 14px rgba(0,0,0,0.55),
+    0 1px 3px rgba(0,0,0,0.4);
+}
+
+.modern-art-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: var(--art-object-position, 50% 50%);
+  display: block;
+  position: relative;
+  z-index: 1;
+  transform: translate(var(--art-offset-x, 0px), var(--art-offset-y, 0px)) rotate(var(--art-rotation, 0deg)) scale(calc(var(--art-cover-scale, 1) * var(--art-scale, 1)));
+  transform-origin: var(--art-object-position, 50% 50%);
+}
+
+/* Blurred backdrop behind the art. It only shows when the picture is zoomed
+   out (Art Zoom < 1x) or rotated so it no longer covers the window — filling
+   the exposed area with an enlarged, blurred copy of the same art so the
+   window keeps looking full instead of appearing to have grown. */
+.modern-art-box::before,
+.retro-art-box::before,
+.glass-art-container::before,
+.borderless-art-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--art-image-url, none);
+  background-size: cover;
+  background-position: var(--art-object-position, 50% 50%);
+  filter: blur(22px) brightness(0.5) saturate(1.15);
+  transform: scale(1.3);
+  pointer-events: none;
+}
+
+.modern-rules-box {
+  background: var(--box-tint);
+  box-shadow:
+    0 0 0 1.5px var(--card-theme-color-dark),
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -1px 3px rgba(0,0,0,0.16),
+    0 1px 2px rgba(0,0,0,0.35);
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+  border-radius: 7px;
+  padding: var(--rules-padding, 22px) var(--rules-padding-horizontal, 26px);
+  position: relative;
+  z-index: 1;
+  /* Stays visible so the P/T plate and stamp can overhang; the clipping
+     guarantee lives on .rules-text-clip inside. */
+  overflow: visible;
+}
+
+.modern-rules-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--parchment);
+  background-size: 420px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.20;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.modern-rules-box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background-image: var(--watermark-image-url);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.04;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Rules text: MPlantin, regular weight, near-black. Line height is tight on
+   printed cards — roughly 1.16 — which is a large part of the authentic look. */
+.modern-rules-text {
+  font-family: var(--font-mtg-body);
+  font-size: var(--rules-font-size, 29px);
+  font-weight: 400;
+  line-height: 1.16;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  color: #0a0a0a;
+  position: relative;
+  z-index: 2;
+}
+
+/* Paragraph rhythm: printed cards separate abilities by roughly half a line. */
+.modern-rules-text br + br {
+  line-height: 0.5;
+}
+
+/* The P/T plate overhangs the bottom-right corner of the text box, matching
+   M15. It is a separate printed plate, so it keeps the frame's bevel. */
+.modern-pt-box {
+  position: absolute;
+  bottom: -16px;
+  right: -2px;
+  min-width: 116px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--box-tint);
+  box-shadow:
+    0 0 0 1.5px var(--card-theme-color-dark),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 3px rgba(0,0,0,0.22),
+    0 2px 5px rgba(0,0,0,0.45);
+  border-radius: 8px;
+  font-family: var(--font-mtg-title);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 0 16px;
+  z-index: 10;
+  color: #0a0a0a;
+}
+
+.modern-pt-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--parchment);
+  background-size: 420px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.22;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.modern-pt-text {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Holofoil security stamp, centred on the bottom edge of the text box.
+   Real stamps are a wide, shallow oval, not a rounded rectangle.
+   Shared by every template; each rules box is position:relative and
+   overflow:visible so the stamp can overhang its bottom edge. Visibility is
+   driven by --stamp-display (set from preset.showStamp) so the toggle works
+   on all four templates, not just Modern. */
+.security-stamp {
+  display: var(--stamp-display, flex);
+  position: absolute;
+  bottom: var(--stamp-offset-y, -17px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 74px;
+  height: 34px;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  background: radial-gradient(ellipse at 35% 30%, #4a4a4e 0%, #1a1a1c 60%, #101012 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.22),
+    0 1px 3px rgba(0,0,0,0.55);
+}
+
+.security-stamp .ms-acorn {
+  font-size: 22px;
+  /* Fixed acorn colour when the set/card sets one, otherwise track the card's
+     (set-aware) rarity colour — the historic behaviour. */
+  color: var(--stamp-acorn-color, var(--rarity-color));
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.6));
+}
+
+/* Collector line — printed in white on the black border below the frame. */
+.modern-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: var(--footer-text-color, #f2f2f2);
+  font-family: var(--font-sans);
+  font-size: var(--footer-font-size, 11px);
+  padding: 7px 14px 0 14px;
+  z-index: 10;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+.modern-footer-left {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.32;
+  min-width: 0;
+}
+
+.modern-print-info {
+  font-size: 1em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.modern-artist-info {
+  font-size: 1em;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modern-copyright {
+  font-size: 0.82em;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.modern-footer-right {
+  font-size: 1em;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+/* The little brush glyph before the artist name. */
+.brush-icon {
+  font-style: normal;
+  opacity: 0.9;
+}
+
+/* ---------------------------------------------------------------- */
+/* TEMPLATE 2: RETRO VINTAGE (Classic 1997 Style)                   */
+/* ---------------------------------------------------------------- */
+
+.template-retro {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--retro-corner-radius, 12px);
+  border: var(--frame-border-width, 3px) solid var(--retro-border-ink, #111111);
+  padding: 18px;
+  background-color: var(--frame-color-solid, #b3a175);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+/* Texture overlay for retro look */
+.template-retro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--frame-texture);
+  mix-blend-mode: var(--blend-mode, multiply);
+  opacity: var(--frame-texture-opacity, 0.4);
+  z-index: -1;
+}
+
+.retro-inner-frame {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  border: 4px solid var(--retro-border-ink, #111111);
+  border-radius: 6px;
+  background: var(--box-tint-retro, #dfded5);
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+  padding: 10px;
+  position: relative;
+}
+
+.retro-header {
+  gap: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, var(--retro-plate-gradient-top, #f2edd9), var(--retro-plate-gradient-bottom, #c3baa5));
+  border: 2px solid var(--retro-border-ink, #111111);
+  border-radius: 4px;
+  height: var(--title-box-height, 52px);
+  width: var(--title-box-width, 100%);
+  margin-left: var(--title-box-margin-left, 0);
+  margin-right: var(--title-box-margin-right, 0);
+  padding: 0 12px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  font-family: var(--font-serif);
+  font-weight: 750;
+  font-size: 26px;
+  color: #111111;
+}
+
+.retro-art-box {
+  height: var(--art-box-height, 380px);
+  border: 3px solid var(--retro-border-ink, #111111);
+  margin-top: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  background-color: #000;
+}
+
+.retro-art-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: var(--art-object-position, 50% 50%);
+  position: relative;
+  z-index: 1;
+  transform: translate(var(--art-offset-x, 0px), var(--art-offset-y, 0px)) rotate(var(--art-rotation, 0deg)) scale(calc(var(--art-cover-scale, 1) * var(--art-scale, 1)));
+  transform-origin: var(--art-object-position, 50% 50%);
+}
+
+.retro-type-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, var(--retro-plate-gradient-top, #f2edd9), var(--retro-plate-gradient-bottom, #c3baa5));
+  border: 2px solid var(--retro-border-ink, #111111);
+  border-radius: 4px;
+  height: var(--type-box-height, 48px);
+  width: var(--type-box-width, 100%);
+  margin-left: var(--type-box-margin-left, 0);
+  margin-right: var(--type-box-margin-right, 0);
+  padding: 0 12px;
+  margin-top: 10px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  font-family: var(--font-serif);
+  font-weight: 750;
+  font-size: 22px;
+  color: #111111;
+}
+
+.retro-rules-box {
+  border: 2px solid var(--retro-border-ink, #111111);
+  background: #eae6db;
+  border-radius: 4px;
+  margin-top: 10px;
+  flex-grow: 1;
+  padding: var(--rules-padding, 16px) var(--rules-padding-horizontal, 20px);
+  font-family: var(--font-serif);
+  color: #111111;
+  line-height: 1.3;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* Faint centred watermark from the template's Default Watermark File. */
+.retro-rules-box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background-image: var(--watermark-image-url);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.05;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.retro-rules-box .rules-text {
+  font-size: var(--rules-font-size, 26px);
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.retro-pt-box {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  border: 3px solid #111111;
+  background: linear-gradient(180deg, #eae6db, #beb8a5);
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: bold;
+  padding: 4px 16px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  color: #111111;
+}
+
+.retro-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--footer-font-size, 10px);
+  color: var(--footer-text-color, #111111);
+  font-weight: bold;
+  margin-top: 6px;
+  text-shadow: none;
+}
+
+/* ---------------------------------------------------------------- */
+/* TEMPLATE 3: BORDERLESS ART (Immersive Full bleed)                */
+/* ---------------------------------------------------------------- */
+
+.template-borderless {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  z-index: 1;
+}
+
+/* The art stretches to fill the entire card bounds */
+.borderless-art-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-color: #111;
+}
+
+.borderless-art-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: var(--art-object-position, 50% 50%);
+  position: relative;
+  z-index: 1;
+  transform: translate(var(--art-offset-x, 0px), var(--art-offset-y, 0px)) rotate(var(--art-rotation, 0deg)) scale(calc(var(--art-cover-scale, 1) * var(--art-scale, 1)));
+  transform-origin: var(--art-object-position, 50% 50%);
+}
+
+/* Tint overlay to ensure contrast and pinstripes */
+.borderless-art-overlay {
+  position: absolute;
+  inset: 0;
+  border: var(--borderless-frame-width, var(--frame-border-width, 10px)) solid var(--card-theme-color-vibrant, #b3a175);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.9);
+  border-radius: var(--borderless-corner-radius, 12px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Dark top/bottom scrim over the full-bleed art so the header, type bar and
+   rules box stay legible. Strength is the template's "Overlay Gradient
+   Opacity" control (per-card metadata overrides it). */
+.borderless-art-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.7) 0%,
+    rgba(0,0,0,0.15) 32%,
+    rgba(0,0,0,0.25) 60%,
+    rgba(0,0,0,0.85) 100%
+  );
+  opacity: var(--overlay-gradient-opacity, 0.6);
+  pointer-events: none;
+}
+
+.borderless-header {
+  gap: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--title-box-height, 60px);
+  width: var(--title-box-width, 100%);
+  margin-left: var(--title-box-margin-left, 0);
+  margin-right: var(--title-box-margin-right, 0);
+  border-radius: 8px;
+  padding: 0 20px;
+  background: rgba(0, 0, 0, var(--borderless-panel-opacity, 0.7));
+  backdrop-filter: blur(var(--borderless-panel-blur, 8px));
+  border: 2px solid rgba(255,255,255,0.25);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  font-family: var(--font-serif);
+  font-weight: bold;
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.borderless-middle-spacer {
+  flex-grow: 1;
+}
+
+.borderless-bottom-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.borderless-type-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--type-box-height, 48px);
+  width: var(--type-box-width, 100%);
+  margin-left: var(--type-box-margin-left, 0);
+  margin-right: var(--type-box-margin-right, 0);
+  border-radius: 6px;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, var(--borderless-panel-opacity, 0.7));
+  backdrop-filter: blur(var(--borderless-panel-blur, 8px));
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  font-family: var(--font-serif);
+  font-weight: bold;
+  font-size: 22px;
+  color: #ffffff;
+}
+
+.borderless-rules-box {
+  background: rgba(0, 0, 0, var(--borderless-panel-opacity, 0.75));
+  backdrop-filter: blur(var(--borderless-panel-blur, 12px));
+  border: 2.5px solid var(--card-theme-color-vibrant, #e4c96a);
+  border-radius: 10px;
+  padding: var(--rules-padding, 24px);
+  /* A definite height (not min-height) is required: .rules-text-clip sizes
+     itself as a percentage of this box, and the layout pass measures that clip
+     to decide how far to shrink the text. With an auto height the percentage
+     never resolves, the text is measured as always fitting, and long rules text
+     gets silently clipped instead of scaled. */
+  height: var(--borderless-text-height, 292px);
+  flex: 0 0 auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  font-family: var(--font-serif);
+  color: #eaeaea;
+  line-height: 1.35;
+  position: relative;
+}
+
+/* Faint centred watermark from the template's Default Watermark File.
+   Brighter than the print templates because it sits on a dark glass panel. */
+.borderless-rules-box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background-image: var(--watermark-image-url);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.08;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.borderless-rules-box .rules-text {
+  font-size: var(--rules-font-size, 26px);
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.borderless-pt-box {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  border-radius: 12px;
+  background: var(--card-theme-color-vibrant, #e4c96a);
+  border: 3px solid #ffffff;
+  padding: 8px 24px;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: bold;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.borderless-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: var(--footer-text-color, #ffffff);
+  font-family: var(--font-sans);
+  font-size: var(--footer-font-size, 10px);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+  padding: 4px 8px 0 8px;
+  z-index: 10;
+}
+
+/* ---------------------------------------------------------------- */
+/* TEMPLATE 4: GLASSMORPHISM (Sleek UI with Neon Glow)              */
+/* ---------------------------------------------------------------- */
+
+.template-glass {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  padding: 24px;
+  background: rgba(10, 15, 30, var(--glass-tint-opacity, 0.45));
+  border: 2px dashed rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+/* Animated gradient glowing background circle backdrops */
+.glass-glow-orb {
+  position: absolute;
+  display: var(--glass-orb-display, block);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--neon-glow, rgba(0, 229, 255, 0.4)) 0%, rgba(0,0,0,0) 70%);
+  filter: blur(40px);
+  z-index: -2;
+  pointer-events: none;
+}
+
+.glass-orb-top {
+  top: 10%;
+  right: -50px;
+}
+
+.glass-orb-bottom {
+  bottom: 10%;
+  left: -50px;
+  background: radial-gradient(circle, var(--neon-glow-secondary, rgba(255, 0, 127, 0.3)) 0%, rgba(0,0,0,0) 70%);
+}
+
+.glass-inner-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: var(--frame-border-width, 2.5px) solid transparent;
+  /* Single-colour cards get the subtle white->neon sheen; multicolour cards
+     get --glass-frame-gradient, built from the card's colours in CardPreview. */
+  background: var(--glass-frame-gradient, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02) 60%, var(--neon-color, #00f5ff))) border-box;
+  box-shadow: inset 0 0 12px rgba(255,255,255,0.05), 0 0 25px rgba(0, 245, 255, 0.15);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.glass-header {
+  gap: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--title-box-height, 62px);
+  width: var(--title-box-width, 100%);
+  margin-left: var(--title-box-margin-left, 0);
+  margin-right: var(--title-box-margin-right, 0);
+  border-radius: 14px;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(var(--glass-panel-blur, 20px));
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur, 20px));
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.glass-art-container {
+  height: var(--art-box-height, 380px);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  margin-top: 14px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,0.4);
+}
+
+.glass-art-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: var(--art-object-position, 50% 50%);
+  position: relative;
+  z-index: 1;
+  filter: contrast(1.05) saturate(1.1);
+  transform: translate(var(--art-offset-x, 0px), var(--art-offset-y, 0px)) rotate(var(--art-rotation, 0deg)) scale(calc(var(--art-cover-scale, 1) * var(--art-scale, 1)));
+  transform-origin: var(--art-object-position, 50% 50%);
+}
+
+.glass-type-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--type-box-height, 50px);
+  width: var(--type-box-width, 100%);
+  margin-left: var(--type-box-margin-left, 0);
+  margin-right: var(--type-box-margin-right, 0);
+  border-radius: 12px;
+  padding: 0 20px;
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--glass-panel-blur, 20px));
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur, 20px));
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  color: #e2e8f0;
+}
+
+.glass-rules-box {
+  border-radius: 14px;
+  background: rgba(10, 15, 30, 0.55);
+  backdrop-filter: blur(var(--glass-panel-blur, 25px));
+  -webkit-backdrop-filter: blur(var(--glass-panel-blur, 25px));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 14px;
+  flex-grow: 1;
+  padding: var(--rules-padding, 24px);
+  font-family: var(--font-sans);
+  color: #f1f5f9;
+  line-height: 1.4;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Faint centred watermark from the template's Default Watermark File. */
+.glass-rules-box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background-image: var(--watermark-image-url);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.08;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Glass is the deliberately non-print template, so it keeps its UI sans face
+   rather than inheriting MPlantin from the shared rules-text rule. */
+.preview-card .glass-rules-box .rules-text {
+  font-family: var(--font-sans);
+  font-size: var(--rules-font-size, 24px);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.glass-pt-box {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--neon-color, #00f5ff);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  padding: 4px 22px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.25), 0 4px 12px rgba(0,0,0,0.4);
+  color: #ffffff;
+  text-shadow: 0 0 6px var(--neon-color, #00f5ff);
+}
+
+.glass-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--footer-font-size, 10px);
+  color: var(--footer-text-color, rgba(255, 255, 255, 0.6));
+  margin-top: 10px;
+  text-shadow: none;
+}

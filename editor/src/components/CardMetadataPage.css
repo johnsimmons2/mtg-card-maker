@@ -1,0 +1,369 @@
+/* ==========================================================================
+   Card Metadata page
+
+   Chart furniture follows the dataviz conventions: hairline solid gridlines one
+   step off the surface, bars capped at 24px with a 2px gap and a 4px rounded
+   data end, and text in text tokens (never the series color). Series colors and
+   the plot height live in CardMetadataPage.jsx.
+   ========================================================================== */
+.cm-page {
+  --cm-grid: rgba(255, 255, 255, 0.06);
+  --cm-axis: rgba(255, 255, 255, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cm-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+
+.cm-scope {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cm-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.cm-section-title { font-size: 1.15rem; }
+.cm-section-note {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 78ch;
+}
+.cm-section-head .cm-section-note { margin-top: 0.3rem; }
+.cm-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+
+.cm-mana {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.cm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.cm-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Segmented control */
+.cm-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-input);
+}
+.cm-seg button {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.3rem 0.85rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.cm-seg button:hover { color: var(--text-primary); }
+.cm-seg button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, hsl(210, 100%, 40%) 100%);
+  color: #fff;
+}
+.cm-seg button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 1px; }
+
+/* Cost charts: one small multiple per color */
+/* Three across when there is room, never narrower than 380px: below that the
+   two-digit cost labels (10-15) start running into each other. */
+.cm-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(380px, calc((100% - 5rem) / 3)), 1fr));
+  gap: 2rem 2.5rem;
+}
+
+.cm-chart {
+  /* 0-15, a gap, then X and Other: those two are categories, not costs 16 and 17.
+     Other gets a fixed width so its label fits at any chart size; the bar grid and
+     the axis labels share these tracks, so both must stay fixed or fractional. */
+  --cm-cols: repeat(16, minmax(0, 1fr)) 0.7rem minmax(0, 1fr) 2.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  border-radius: 8px;
+  outline: none;
+}
+.cm-chart:focus-visible { box-shadow: 0 0 0 2px var(--border-focus); }
+
+.cm-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cm-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.cm-chart-total {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cm-area {
+  position: relative;
+  height: var(--cm-plot-height);
+  margin: 1.1rem 0 0 2rem;
+  border-bottom: 1px solid var(--cm-axis);
+}
+.cm-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--cm-grid);
+}
+.cm-tick {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  transform: translate(-0.5rem, -50%);
+  font-size: 0.68rem;
+  line-height: 1;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cm-tick-zero { top: auto; bottom: 0; transform: translate(-0.5rem, 50%); }
+
+.cm-bars {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--cm-cols);
+}
+.cm-col {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 4px 4px 0 0;
+}
+.cm-col.is-focused { background: rgba(255, 255, 255, 0.045); }
+.cm-bar {
+  width: calc(100% - 2px);
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  transition: filter var(--transition-fast);
+}
+.cm-col.is-focused .cm-bar { filter: brightness(1.2); }
+.cm-peak {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.cm-sep { margin-left: 50%; border-left: 1px solid var(--cm-grid); }
+
+.cm-xaxis {
+  display: grid;
+  grid-template-columns: var(--cm-cols);
+  margin: 0.4rem 0 0 2rem;
+}
+.cm-xlabel {
+  text-align: center;
+  font-size: 0.66rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cm-xlabel.is-focused { color: var(--text-primary); }
+
+/* Tooltip: rendered into <body>, so nothing here may depend on .cm-page. */
+.cm-tip {
+  position: fixed;
+  z-index: 200;
+  transform: translate(-50%, -100%);
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: hsl(222, 18%, 9%);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.cm-tip.is-below { transform: translate(-50%, 0); }
+.cm-tip-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.cm-tip-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+.cm-key { width: 12px; height: 3px; border-radius: 2px; }
+
+/* Tables */
+.cm-table-wrap { overflow-x: auto; }
+.cm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+/* Seven short columns read better close together than stretched across the page. */
+.cm-table-narrow { max-width: 60rem; }
+.cm-table th,
+.cm-table td {
+  padding: 0.45rem 0.85rem;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--cm-grid);
+}
+.cm-table th:first-child,
+.cm-table td:first-child { padding-left: 0.25rem; text-align: left; }
+.cm-table thead th {
+  vertical-align: bottom;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+.cm-table thead th .cm-mana { margin-right: 0.35rem; }
+.cm-table tbody th { font-weight: 500; color: var(--text-primary); }
+.cm-table td { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.cm-table td.is-zero { color: var(--text-muted); opacity: 0.5; }
+.cm-table td.is-total { font-weight: 700; }
+.cm-table tr.is-empty { opacity: 0.45; }
+.cm-table tr.is-empty td.is-zero { opacity: 1; }
+.cm-table thead th .set-symbol { text-transform: none; letter-spacing: normal; }
+.cm-table tr.cm-group th {
+  padding-top: 1.1rem;
+  text-align: left;
+  border-bottom-color: var(--border-color);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.cm-table tr.cm-row-break th,
+.cm-table tr.cm-row-break td { border-top: 1px solid var(--border-color); }
+.cm-table tfoot th,
+.cm-table tfoot td {
+  border-top: 1px solid var(--border-color);
+  border-bottom: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.cm-set-name { margin-left: 0.6rem; font-size: 0.78rem; font-weight: 400; color: var(--text-muted); }
+
+/* Cost warnings: gold = attention, always paired with an icon and a label */
+.cm-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: 12px;
+  background: hsla(45, 80%, 55%, 0.07);
+}
+.cm-warning-icon { flex: none; margin-top: 0.15rem; color: var(--accent-gold); }
+.cm-warning h3 { font-size: 0.92rem; }
+.cm-warning p {
+  margin-top: 0.2rem;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.cm-warning-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cm-warning-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.83rem;
+}
+.cm-warning-list .cm-meta { color: var(--text-muted); font-size: 0.78rem; }
+.cm-link,
+.cm-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.cm-link {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 3px;
+}
+.cm-link:hover { text-decoration-color: var(--text-primary); }
+.cm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.cm-toggle:hover { color: var(--text-primary); }
+.cm-link:focus-visible,
+.cm-toggle:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; border-radius: 3px; }

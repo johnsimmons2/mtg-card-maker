@@ -1,0 +1,56 @@
+# ---- Node / editor app ----
+node_modules/
+editor/node_modules/
+
+# Vite build output and caches
+dist/
+editor/dist/
+.vite/
+*.local
+
+# npm/yarn/pnpm debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ---- Python (card generator) ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.dev/
+.venv/
+venv/
+
+# ---- Local environment / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Editor / OS cruft ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Claude Code nested worktrees (full repo checkouts) ----
+.claude/worktrees/
+
+# ---- User content (kept local) ----
+/cards.json
+/cards_backup.json
+/sets_config.json
+/art/*
+!/art/.gitkeep
+!/art/backgrounds/
+/art/backgrounds/*
+!/art/backgrounds/.gitkeep
+/output/*
+!/output/.gitkeep
+/checkpoint/
+*.tsdb

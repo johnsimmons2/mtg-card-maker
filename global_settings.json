@@ -1,0 +1,99 @@
+{
+  "symbolVerticalAlign": "middle",
+  "symbolSize": "0.95em",
+  "symbolSizeHeader": "0.95em",
+  "symbolSizeRules": "0.95em",
+  "symbolMarginLeft": "0.1em",
+  "symbolMarginRight": "0.1em",
+  "innerGlyphScale": "1.2",
+  "innerGlyphOffsetX": "0.01rem",
+  "innerGlyphOffsetY": "-0.03rem",
+  "innerGlyphScaleNumeric": "0.8",
+  "innerGlyphOffsetXNumeric": "0rem",
+  "innerGlyphOffsetYNumeric": "0rem",
+  "palette": {
+    "COLORS": {
+      "pale": "#b3a175",
+      "white": "#f8f0e3",
+      "blue": "#3E8BAA",
+      "black": "#585858",
+      "red": "#DA3A35",
+      "green": "#1E6E3D",
+      "artifact": "#8A99A8"
+    },
+    "PALE_COLORS": {
+      "pale": "#f4f3eb",
+      "white": "#fcfaf5",
+      "blue": "#eaf2f8",
+      "black": "#e8e7e6",
+      "red": "#fcedec",
+      "green": "#eaf5ec",
+      "artifact": "#eef0f2"
+    },
+    "THEME_COLORS": {
+      "pale": {
+        "vibrant": "#cdb98f",
+        "dark": "#4b3d26"
+      },
+      "white": {
+        "vibrant": "#fffdf2",
+        "dark": "#a2977a"
+      },
+      "blue": {
+        "vibrant": "#79b4cd",
+        "dark": "#15455c"
+      },
+      "black": {
+        "vibrant": "#8f8c88",
+        "dark": "#1a1a1a"
+      },
+      "red": {
+        "vibrant": "#ec8168",
+        "dark": "#6d1a14"
+      },
+      "green": {
+        "vibrant": "#5d9b6c",
+        "dark": "#0d3d21"
+      },
+      "artifact": {
+        "vibrant": "#b6c3ce",
+        "dark": "#3b4650"
+      }
+    },
+    "goldFrameStart": "#e4c96a",
+    "goldFrameEnd": "#c5a342",
+    "goldBoxStart": "#f7f2e1",
+    "goldBoxEnd": "#f0e6c8",
+    "goldThemeVibrant": "#e6cf83",
+    "goldThemeDark": "#6d5719"
+  },
+  "colorRules": {
+    "landRules": [
+      {
+        "keyword": "mountain",
+        "symbol": "{r}",
+        "color": "red"
+      },
+      {
+        "keyword": "forest",
+        "symbol": "{g}",
+        "color": "green"
+      },
+      {
+        "keyword": "swamp",
+        "symbol": "{b}",
+        "color": "black"
+      },
+      {
+        "keyword": "island",
+        "symbol": "{u}",
+        "color": "blue"
+      },
+      {
+        "keyword": "plains",
+        "symbol": "{w}",
+        "color": "white"
+      }
+    ]
+  }
+}
